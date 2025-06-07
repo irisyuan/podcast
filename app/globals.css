@@ -1,0 +1,110 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 0 0% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+    --primary: 0 0% 9%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 0% 3.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+    --color-primary-teal: #1AC6B4;
+    --color-secondary-purple: #4C2FBD;
+    --color-accent-orange: #FF9F1C;
+    --color-neutral-light: #FFFFFF;
+    --color-neutral-dark: #2E2E2E;
+    --color-gray-ui: #F2F2F2;
+    --font-primary: "Poppins", -apple-system, BlinkMacSystemFont,
+      "Segoe UI", Roboto, sans-serif;
+    --font-size-base: 16px;
+    --font-size-sm: 14px;
+    --font-size-lg: 18px;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-primary);
+    font-size: var(--font-size-base);
+    color: var(--color-neutral-dark);
+    background-color: var(--color-neutral-light);
+    line-height: 1.5;
+  }
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-primary);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-secondary-purple);
+  margin-bottom: 0.5em;
+}
+
+a {
+  color: var(--color-secondary-purple);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-secondary-purple);
+}
+
+/* Button styles */
+.btn-primary {
+  background-color: var(--color-primary-teal);
+  color: var(--color-neutral-light);
+  font-weight: var(--font-weight-medium);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  background-color: var(--color-primary-teal);
+}
+
+/* Ensure the button on the sign-up page is teal */
+.sign-up-page .btn-primary {
+  background-color: var(--color-primary-teal);
+}
+
+/* Accent usage */
+.badge-new {
+  background-color: var(--color-accent-orange);
+  color: var(--color-neutral-light);
+  font-size: var(--font-size-sm);
+  padding: 0.2rem 0.5rem;
+  border-radius: 12px;
+}
+
+.header-text {
+  font-family: 'Merriweather', serif;
+}
