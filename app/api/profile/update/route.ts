@@ -10,12 +10,12 @@ export async function POST(request: Request) {
   const supabase = createRouteHandlerClient({ cookies: () => cookieStore });
 
   // 3) Now get the user from Supabase Auth:
-  const {
-    data: { user },
+    const {
+      data: { user },
     error: userError,
-  } = await supabase.auth.getUser();
+    } = await supabase.auth.getUser();
 
-  if (userError || !user) {
+    if (userError || !user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -36,20 +36,20 @@ export async function POST(request: Request) {
   }
 
   // 5) Perform the update on the `profiles` table:
-  const { error: updateError } = await supabase
-    .from('profiles')
+    const { error: updateError } = await supabase
+      .from('profiles')
     .update({
       first_name: firstName,
       last_name: lastName,
-      updated_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
     })
     .eq('user_id', user.id);
 
-  if (updateError) {
+    if (updateError) {
     console.error('Failed to update profile:', updateError);
     return NextResponse.json({ error: 'Failed to update profile' }, { status: 500 });
-  }
+    }
 
   // 6) Return success
   return NextResponse.json({ message: 'Profile updated successfully' }, { status: 200 });
-}
+} 

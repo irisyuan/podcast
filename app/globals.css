@@ -87,15 +87,6 @@ a:hover {
   padding: 0.5rem 1rem;
   cursor: pointer;
 }
-.btn-primary:hover {
-  background-color: var(--color-primary-teal);
-}
-
-/* Ensure the button on the sign-up page is teal */
-.sign-up-page .btn-primary {
-  background-color: var(--color-primary-teal);
-}
-
 /* Accent usage */
 .badge-new {
   background-color: var(--color-accent-orange);
@@ -107,4 +98,9 @@ a:hover {
 
 .header-text {
   font-family: 'Merriweather', serif;
+}
+
+.sign-up-page .btn-primary {
+  background-color: var(--color-primary-teal) !important;
+  color: var(--color-neutral-light) !important;
 }
