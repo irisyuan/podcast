@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function PodcastSearch() {
@@ -10,7 +11,7 @@ export default function PodcastSearch() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Clear results when term is cleared
+  // Clear results and errors when term is emptied
   useEffect(() => {
     if (term.trim() === "") {
       setResults([]);
@@ -64,15 +65,20 @@ export default function PodcastSearch() {
         <ul className="mt-4 space-y-3 max-h-64 overflow-auto">
           {results.map((show) => (
             <li key={show.collectionId} className="flex items-center gap-4">
-              <img
-                src={show.artworkUrl100}
-                alt={show.collectionName}
-                className="w-12 h-12 rounded"
-              />
-              <div>
-                <p className="font-semibold">{show.collectionName}</p>
-                <p className="text-sm text-gray-600">{show.artistName}</p>
-              </div>
+              <Link
+                href={`/pods/${show.collectionId}`}
+                className="flex items-center gap-4 p-2 hover:bg-gray-100 rounded"
+              >
+                <img
+                  src={show.artworkUrl100}
+                  alt={show.collectionName}
+                  className="w-12 h-12 rounded"
+                />
+                <div>
+                  <p className="font-semibold">{show.collectionName}</p>
+                  <p className="text-sm text-gray-600">{show.artistName}</p>
+                </div>
+              </Link>
             </li>
           ))}
         </ul>
