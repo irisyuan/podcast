@@ -1,5 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import PodcastSearch from "@/components/PodcastSearch";
 
 export default async function PodsPage() {
   const supabase = await createClient();
@@ -16,11 +17,11 @@ export default async function PodsPage() {
     <div className="flex-1 w-full flex flex-col gap-12 px-8 mx-auto text-left">
       <div className="flex flex-col gap-4 items-center mt-4">
         <h2 className="font-bold text-2xl">Podcast Episodes</h2>
-        <input
-          type="text"
-          placeholder="Search podcast name, episode, description..."
-          className="w-full max-w-md p-2 border rounded-md bg-white"
-        />
+
+        {/* ← Search UI inserted here */}
+        <PodcastSearch />
+
+        {/* ← Your existing table */}
         <table className="min-w-full bg-white">
           <thead>
             <tr>
