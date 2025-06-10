@@ -18,19 +18,20 @@ export default async function AuthButton() {
           <Globe className="h-4 w-4" /> Discover
         </Link>
       </Button>
+     
+      <Button asChild variant="ghost" size="sm" className="text-sm">
+        <Link href="/pods/profile" className="flex items-center gap-1">
+          <Headphones className="h-4 w-4" /> My Podcasts
+        </Link>
+      </Button>
+
       <Button asChild variant="ghost" size="sm" className="text-sm">
         <Link href="/pods/friends" className="flex items-center gap-1">
           <Heart className="h-4 w-4" /> Friends
         </Link>
       </Button>
-      <Button asChild variant="ghost" size="sm" className="text-sm">
-        <Link href="/pods/profile" className="flex items-center gap-1">
-          <Headphones className="h-4 w-4" /> My Pods
-        </Link>
-      </Button>
-      <span>
-        {user.email}
-      </span>
+
+    
       <form action={signOutAction}>
         <Button type="submit" variant={"outline"}>
           Sign out

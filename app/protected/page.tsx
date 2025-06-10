@@ -1,37 +1,151 @@
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
+"use client";
 
-export default async function PodsPage() {
-  const supabase = await createClient();
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@/utils/supabase/client";
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export default function ProfilePage() {
+  const supabase = createClient();
+  const router = useRouter();
 
-  if (!user) {
-    return redirect("/sign-in");
-  }
+  const [user, setUser] = useState<{ id: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [ratings, setRatings] = useState<
+    { uuid: string; podcast_id: string; user_rating: number; review_text: string }[]
+  >([]);
+
+  useEffect(() => {
+    async function init() {
+      const {
+        data: { user },
+        error,
+      } = await supabase.auth.getUser();
+
+      if (error || !user) {
+        console.log("No user found, redirecting to login");
+        router.push("/login");
+        return;
+      }
+
+      setUser(user);
+
+      // load existing profile
+      const { data: profile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("first_name, last_name")
+        .eq("user_id", user.id)
+        .single();
+
+      if (!fetchError && profile) {
+        setFirstName(profile.first_name ?? "");
+        setLastName(profile.last_name ?? "");
+      }
+
+      // load user ratings
+      const { data: userRatings, error: ratingsError } = await supabase
+        .from("ratings")
+        .select("uuid, podcast_id, user_rating, review_text")
+        .eq("user_id", user.id);
+
+      if (!ratingsError && userRatings) {
+        setRatings(userRatings);
+      }
+
+      setLoading(false);
+    }
+
+    init();
+  }, [supabase, router]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    const res = await fetch("/api/profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user_id: user.id,
+        first_name: firstName,
+        last_name: lastName,
+      }),
+    });
+
+    if (!res.ok) {
+      console.error("Failed to update profile:", await res.text());
+      alert("Error saving profile");
+      return;
+    }
+
+    alert("Profile saved!");
+  };
+
+  if (loading) return <p>Loading…</p>;
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-12 px-8 mx-auto text-left">
-      <div className="flex flex-col gap-4 items-center mt-8">
-        <h2 className="font-bold text-2xl">Podcast Episodes</h2>
-        <input
-          type="text"
-          placeholder="Search podcast name, episode, description..."
-          className="w-full max-w-md p-2 border rounded-md bg-white"
-        />
-        <table className="min-w-full bg-white">
+    <div className="max-w-4xl mx-auto mt-8 grid grid-cols-3 gap-6">
+      {/* Profile Form - 1/3 width */}
+      <div className="col-span-1 p-4 border rounded bg-white">
+        <h2 className="text-xl font-semibold mb-4">Update Profile</h2>
+        <form className="space-y-4" onSubmit={handleSubmit}>
+          <div>
+            <label className="block font-medium">First Name</label>
+            <input
+              className="mt-1 block w-full border px-2 py-1 rounded bg-white"
+              value={firstName}
+              onChange={(e) => setFirstName(e.currentTarget.value)}
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block font-medium">Last Name</label>
+            <input
+              className="mt-1 block w-full border px-2 py-1 rounded bg-white"
+              value={lastName}
+              onChange={(e) => setLastName(e.currentTarget.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn-primary px-4 py-2 rounded"
+          >
+            Save Profile
+          </button>
+        </form>
+      </div>
+
+      {/* User Ratings Table - 2/3 width */}
+      <div className="col-span-2 p-4 border rounded bg-white">
+        <h2 className="text-xl font-semibold mb-4">Your Podcast Ratings</h2>
+        <table className="w-full table-auto border-collapse">
           <thead>
             <tr>
-              <th className="py-2">Title</th>
-              <th className="py-2">Description</th>
-              <th className="py-2">Date</th>
-              <th className="py-2">Review</th>
+              <th className="border-b px-2 py-1 text-left">Podcast ID</th>
+              <th className="border-b px-2 py-1 text-left">Rating</th>
+              <th className="border-b px-2 py-1 text-left">Review</th>
             </tr>
           </thead>
           <tbody>
-            {/* Podcast episodes will be populated here */}
+            {ratings.length === 0 ? (
+              <tr>
+                <td colSpan={3} className="px-2 py-4 text-center">
+                  You haven't reviewed any podcasts yet.
+                </td>
+              </tr>
+            ) : (
+              ratings.map((r) => (
+                <tr key={r.uuid} className="hover:bg-gray-50">
+                  <td className="border-b px-2 py-2">{r.podcast_id}</td>
+                  <td className="border-b px-2 py-2">{r.user_rating}</td>
+                  <td className="border-b px-2 py-2">{r.review_text}</td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

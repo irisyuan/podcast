@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { categoryStyles } from "@/utils/categoryStyles";
 import { useState, useEffect } from "react";
 
 // Format date to a readable string
