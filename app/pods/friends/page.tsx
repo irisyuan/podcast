@@ -1,168 +1,112 @@
-"use client";
-// import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-import { Heart } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useState, useEffect } from "react";
-
-// Format date to a readable string
-function formatDate(dateStr: string) {
-  const date = new Date(dateStr);
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-}
+"use client"
+import { useState, useEffect, FormEvent } from "react"
+import { Button } from "@/components/ui/button"
 
 export default function FriendsPage() {
-  // Get current user
-  // const supabase = await createClient();
-  // const { data: { user } } = await supabase.auth.getUser();
+  const [friends, setFriends] = useState<any[]>([])
+  const [query, setQuery] = useState("")
+  const [searchResults, setSearchResults] = useState<
+    { id: string; first_name: string; last_name: string }[]
+  >([])
 
-  // Temporarily bypass user check for rendering
-  // if (!user) {
-  //   return redirect("/sign-in");
-  // }
+  // 1) fetch your current friends
+  const loadFriends = async () => {
+    const res = await fetch("/api/friends")
+    const { friends: list } = await res.json()
+    setFriends(list)
+  }
+  useEffect(() => { loadFriends() }, [])
 
-  const [friends, setFriends] = useState<any[]>([]);
-  const [userInteractions, setUserInteractions] = useState<any[]>([]);
-
-  // Fetch friends using API route
-  useEffect(() => {
-    const fetchFriends = async () => {
-      const response = await fetch('/api/friends/list');
-      const data = await response.json();
-      setFriends(data);
-    };
-    fetchFriends();
-  }, []);
-
-  // Fetch user interactions using API route
-  useEffect(() => {
-    const fetchUserInteractions = async () => {
-      const response = await fetch('/api/friends/interactions');
-      const data = await response.json();
-      setUserInteractions(data);
-    };
-    fetchUserInteractions();
-  }, []);
-
-  
-  // Create a map of friend_id to user interaction for easy lookups
-  const userInteractionsMap = userInteractions.reduce((map: Record<string, any>, interaction) => {
-    map[interaction.friend_id] = interaction;
-    return map;
-  }, {});
-
-  // Add the search logic
-  const [searchResults, setSearchResults] = useState<{ id: string; first_name: string; last_name: string; }[]>([]);
-
-  const handleSearchChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    if (query.length > 2) {
-      const response = await fetch(`/api/friends/search?query=${query}`);
-      const users = await response.json();
-      setSearchResults(users);
-    } else {
-      setSearchResults([]);
+  // 2) on-submit search handler
+  const handleSearchSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await fetch(`/api/friends/search?query=${encodeURIComponent(query)}`);
+      if (!res.ok) {
+        console.error("Search error:", await res.text());
+        return;
+      }
+      setSearchResults(await res.json());
+    } catch (err) {
+      console.error("Fetch failed:", err);
     }
-  };
+  }
+  
+
+  // 3) add a friend
+  const handleAddFriend = async (friendId: string) => {
+    const res = await fetch("/api/friends", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ friend_id: friendId }),
+    })
+    if (res.ok) {
+      loadFriends()
+      setSearchResults(sr => sr.filter(u => u.id !== friendId))
+    } else {
+      console.error("Add friend failed", await res.json())
+    }
+  }
 
   return (
-    <div className="flex-1 w-full flex flex-col gap-8 text-center px-4">
-      <div className="flex justify-between items-center w-full">
-        <h2 className="font-medium text-xl">Friends</h2>
+    <div className="p-4 space-y-8">
+      <h2 className="text-xl font-medium">Friends</h2>
+
+      {/* search form */}
+      <form onSubmit={handleSearchSubmit} className="flex items-center gap-2">
         <input
           type="text"
-          placeholder="Search for a friend"
-          className="w-full max-w-xl p-2 border rounded-md bg-white"
-          onChange={handleSearchChange}
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Search for a friend…"
+          className="btn-primary
+            w-full max-w-md p-2 border rounded
+            bg-white text-black
+            dark:bg-white dark:text-black
+          "
         />
-      </div>
+ <button
+    type="submit"
+    className="px-4 py-2 btn-primary text-white rounded"
+  >
+    Search
+  </button>      </form>
 
-      {friends.length > 0 ? (
-          <div className="w-full mt-4 space-y-4">
-          {friends.map((friend: any) => {
-              // In Supabase's nested queries, the related data comes as the first item of an array
-            const episode = Array.isArray(friend.podcast_episodes) 
-              ? friend.podcast_episodes[0] 
-              : friend.podcast_episodes;
-              
-              // Get user interaction if available
-            const userInteraction = userInteractionsMap[friend.id];
-              
-              if (!episode) return null;
-                            
-              return (
-              <div key={friend.id} className="border rounded-lg p-4 bg-card text-left text-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="flex-shrink-0">
-                      <Heart className="h-4 w-4 fill-red-500 text-red-500" />
-                    </div>
-                    <div className="space-y-3 w-full">
-                      <div>
-                        <div className="flex items-start justify-between">
-                          <h3 className="font-medium text-base">{episode.title}</h3>
-                          <span className="text-[10px] text-muted-foreground">
-                          {formatDate(friend.created_at)}
-                          </span>
-                        </div>
-                        <div className="flex flex-wrap gap-1 items-center mt-1">
-                          <span 
-                            className="text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1"
-                            style={{ 
-                              backgroundColor: `${color}20`,
-                              borderColor: color
-                            }}
-                          >
-                            {emoji} {episode.category}
-                          </span>
-                          <span className="text-[10px] px-2 py-0.5 bg-secondary rounded-full">Date: {episode.date}</span>
-                          {userInteraction && (
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full ${userInteraction.is_liked ? 'bg-green-500/20 text-green-700' : 'bg-red-500/20 text-red-700'}`}>
-                              {userInteraction.is_liked ? 'Liked' : 'Unliked'}
-                            </span>
-                          )}
-                          {!userInteraction && (
-                            <span className="text-[10px] px-2 py-0.5 bg-blue-500/20 text-blue-700 rounded-full">
-                              Not Interacted
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                        {episode.description.split('\n').map((line: string, lineIndex: number) => {
-                          // Add classes for styling based on line type
-                          let className = "p-2 border rounded-md text-sm text-center";
-                          
-                          if (line.startsWith('*')) {
-                            className += " bg-green-500/10 border-green-500";
-                          } else if (line.startsWith('-')) {
-                            className += " bg-red-500/10 border-red-500";
-                          }
-                          
-                          return (
-                            <div
-                              key={lineIndex}
-                              className={className}
-                            >
-                              {line}
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-        <p className="text-muted-foreground mt-4">You haven't added any friends yet.</p>
-        )}
+
+
+
+
+      {/* show search hits */}
+      {query.length > 2 && (
+  searchResults.length > 0 ? (
+    <div className="space-y-2">
+      {searchResults.map(u => (
+        <div key={u.id} className="flex items-center justify-between p-2 border rounded">
+          <span>{u.first_name} {u.last_name}</span>
+          <Button size="sm" onClick={() => handleAddFriend(u.id)}>
+            Add Friend
+          </Button>
+        </div>
+      ))}
     </div>
-  );
-} 
+  ) : (
+    <p className="text-sm text-muted-foreground">No results found</p>
+  )
+)}
+
+
+      {/* your existing friends-list UI */}
+      {friends.length > 0 ? (
+        <ul className="space-y-2">
+          {friends.map(f => (
+            <li key={f.friend_id}>
+              {f.profiles.first_name} {f.profiles.last_name}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>You haven’t added any friends yet.</p>
+      )}
+    </div>
+  )
+}

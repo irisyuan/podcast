@@ -23,6 +23,7 @@ export default async function PodsPage() {
    id,
    user_rating,
    review_text,
+
    podcasts!inner(
     id,
      title,
@@ -50,6 +51,8 @@ export default async function PodsPage() {
             <th className="py-2 px-4 text-left">Description</th>
             <th className="py-2 px-4 text-left">Release Date</th>
             <th className="py-2 px-4 text-left">Rating & Review</th>
+            <th className="py-2 px-4 text-left">Added By</th>
+
           </tr>
         </thead>
         <tbody>
@@ -103,6 +106,7 @@ export default async function PodsPage() {
                   {r.review_text || <em>No review provided</em>}
                 </div>
               </td>
+              
             </tr>
           ))}
         </tbody>
