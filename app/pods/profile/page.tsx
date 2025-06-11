@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Star } from "lucide-react";
+import Link from "next/link";
 
 export default function ProfilePage() {
   const supabase = createClient();
@@ -47,7 +48,13 @@ export default function ProfilePage() {
       // load user ratings with podcast titles
       const { data: userRatings, error: ratingsError } = await supabase
         .from("ratings")
-        .select(`id, user_rating, review_text, podcasts!inner(title)`)  
+        .select(`id, 
+          user_rating, 
+          review_text, 
+   podcasts!inner(
+    id,
+     title
+   )`)  
         .eq("user_id", user.id);
 
       if (!ratingsError && userRatings) {
@@ -143,7 +150,15 @@ export default function ProfilePage() {
             ) : (
               ratings.map((r) => (
                 <tr key={r.id} className="hover:bg-gray-50">
-                  <td className="border-b px-2 py-2">{r.podcasts.title}</td>
+                  <td className="border-b px-2 py-2">
+
+
+                  <Link
+                  href={`/pods/${r.podcasts.id}`}
+                  className="text-blue-600 hover:underline"
+                >
+                  {r.podcasts.title}
+                </Link></td>
                   <td className="border-b px-2 py-2">
                     <div className="flex">
                       {Array.from({ length: 5 }, (_, i) => {

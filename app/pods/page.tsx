@@ -23,22 +23,26 @@ export default async function PodsPage() {
    id,
    user_rating,
    review_text,
-
    podcasts!inner(
     id,
      title,
      description,
      release_date,
      cover_art_url
+   ),
+   profiles!inner(
+    first_name,
+    last_name
    )
  `)
  .order("created_at", { ascending: false });
 
 
  return (
-  <div className="flex-1 w-full flex flex-col gap-12 px-8 mx-auto text-left">
-    <div className="flex flex-col gap-4 items-center mt-4">
-      <h2 className="font-bold text-2xl">Podcasts</h2>
+  <div className="flex-1 w-full flex flex-col gap-8 px-8 mx-auto text-left">
+    {/* ► Removed mt-4, changed items-center → items-start */}
+    <div className="flex flex-col gap-4 items-start">
+      <h2 className="font-bold text-2xl">Discover Podcasts</h2>
 
       {/* ← Search UI */}
       <PodcastSearch />
@@ -52,13 +56,12 @@ export default async function PodsPage() {
             <th className="py-2 px-4 text-left">Release Date</th>
             <th className="py-2 px-4 text-left">Rating & Review</th>
             <th className="py-2 px-4 text-left">Added By</th>
-
           </tr>
         </thead>
         <tbody>
           {(!ratings || ratings.length === 0) && (
             <tr>
-              <td colSpan={5} className="py-4 text-center">
+              <td colSpan={6} className="py-4 text-center">
                 No ratings yet.
               </td>
             </tr>
@@ -106,7 +109,13 @@ export default async function PodsPage() {
                   {r.review_text || <em>No review provided</em>}
                 </div>
               </td>
-              
+
+              {/* ◀️ Added the border-b and padding here */}
+              <td className="border-b px-4 py-2">
+                <div className="text-sm text-gray-700">
+                  {r.profiles.first_name} {r.profiles.last_name}
+                </div>
+              </td>
             </tr>
           ))}
         </tbody>
