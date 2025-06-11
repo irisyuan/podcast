@@ -1,5 +1,3 @@
-// app/pods/[podcastId]/page.tsx
-
 import { notFound } from "next/navigation";
 import RatingStars from "@/components/RatingStars";
 
@@ -11,23 +9,24 @@ interface Show {
   artworkUrl100?: string;
 }
 
+interface PodcastPageProps {
+  params: { podcastId: string };
+}
+
 export const revalidate = 60; // ISR cache for 60s
 
-// Destructure `podcastId` directly out of `params`
-export default async function PodcastPage({
-  params: { podcastId },
-}: {
-  params: { podcastId: string };
-}) {
+export default async function PodcastPage({ params }: PodcastPageProps) {
+  const { podcastId } = params;
+
   // 1) iTunes Lookup
   const lookupRes = await fetch(
     `https://itunes.apple.com/lookup?id=${podcastId}`,
-    { next: { revalidate: 60 } }
+    { next: { revalidate } }
   );
   if (!lookupRes.ok) notFound();
   const lookupJson = await lookupRes.json();
   const show: Show = lookupJson.results[0];
-  if (!show || !show.feedUrl) notFound();
+  if (!show?.feedUrl) notFound();
 
   // 2) Fetch RSS feed description (stripped/sanitized as before)...
   let rawDescription = "";
@@ -45,8 +44,9 @@ export default async function PodcastPage({
       }
     }
   } catch {
-    /* ignore */
+    /* ignore parsing errors */
   }
+
   const description = rawDescription
     .replace(/<[^>]+>/g, "")
     .replace(/&nbsp;/g, " ")
@@ -69,27 +69,25 @@ export default async function PodcastPage({
         />
       )}
       <div className="flex-1">
-      <h1> 
         {/* ⭐️ Star rating UI */}
-        <RatingStars podcastId={podcastId} /></h1>
-
-
+        <RatingStars
+  podcastId={podcastId}
+  title={show.collectionName}
+  description={description}
+  releaseDate={show.releaseDate}
+  coverArtUrl={show.artworkUrl100}
+/>
 
         <h1 className="text-3xl font-bold mb-2">{show.collectionName}</h1>
         <p className="text-sm text-gray-600 mb-4">
-          By {show.artistName} • Released{" "}
-          {new Date(show.releaseDate).toLocaleDateString()}
+          By {show.artistName} • Released {new Date(show.releaseDate).toLocaleDateString()}
         </p>
-
-
 
         {description && (
           <div className="prose mb-6">
             <p>{description}</p>
           </div>
         )}
-
-      
       </div>
     </div>
   );

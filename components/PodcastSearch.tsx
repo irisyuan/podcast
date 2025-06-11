@@ -55,7 +55,7 @@ export default function PodcastSearch() {
           onChange={(e) => setTerm(e.currentTarget.value)}
           className="flex-1 border px-2 py-1 rounded bg-white"
         />
-        <Button type="submit" disabled={loading}>
+        <Button type="submit" className="btn-primary" disabled={loading}>
           {loading ? "Searching…" : "Search"}
         </Button>
       </form>

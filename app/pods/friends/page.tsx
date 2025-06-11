@@ -48,14 +48,7 @@ export default function FriendsPage() {
     };
     fetchUserInteractions();
   }, []);
-  
-  // Get all podcast episode IDs from the favorites
-  const episodeIds = friends?.map(friend => {
-    const episode = Array.isArray(friend.podcast_episodes) 
-      ? friend.podcast_episodes[0] 
-      : friend.podcast_episodes;
-    return episode?.id;
-  }).filter(Boolean) || [];
+
   
   // Create a map of friend_id to user interaction for easy lookups
   const userInteractionsMap = userInteractions.reduce((map: Record<string, any>, interaction) => {
@@ -101,9 +94,7 @@ export default function FriendsPage() {
             const userInteraction = userInteractionsMap[friend.id];
               
               if (!episode) return null;
-              
-              const { emoji, color } = categoryStyles[episode.category] || { emoji: "❓", color: "#808080" };
-              
+                            
               return (
               <div key={friend.id} className="border rounded-lg p-4 bg-card text-left text-sm">
                   <div className="flex items-start gap-3">
